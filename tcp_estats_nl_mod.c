@@ -157,7 +157,7 @@ tcp_estats_find_var_by_iname(struct tcp_estats_var **var, const char *name)
 	*var = NULL;
 	for (i = 0; i < MAX_TABLE; i++) {
 		for (j = 0; j < estats_max_index[i]; j++) {
-			if (strnicmp(estats_var_array[i][j].name,
+			if (strncasecmp(estats_var_array[i][j].name,
 				     name, 21) == 0) {
 				*var = &estats_var_array[i][j];
 				return;
@@ -648,7 +648,8 @@ genl_list_conns(struct sk_buff *skb, struct genl_info *info)
 		}
 
 		/* updates nlmsg_len only - can't fail */
-		conn_msg_size = genlmsg_end(msg, hdr) - old_skblen;
+		genlmsg_end(msg, hdr);
+		conn_msg_size = msg->len - old_skblen;
 		old_skblen = msg->len;
 	}
 	/* reached end of list, or out of room in socket buffer -
@@ -867,7 +868,8 @@ genl_read_all(struct sk_buff *skb, struct genl_info *info)
 			break;
 		}
 
-		conn_msg_size = genlmsg_end(msg, hdr) - old_skblen;
+		genlmsg_end(msg, hdr);
+		conn_msg_size = msg->len - old_skblen;
 		old_skblen = msg->len;
 	}
 
