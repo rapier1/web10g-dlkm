@@ -193,10 +193,11 @@ static void read_MSSRcvd(void *buf, struct tcp_estats *stats,
 			 struct tcp_estats_var *vp)
 {
 	u32 val = 1500;
-/*	struct tcp_sock *tp = tcp_sk(stats->sk);
- *	u32 val = tp->rx_opt.rec_mss;
- */
-	memcpy(buf, &val, 4);
+	/* why was this removed? */
+	/*struct tcp_sock *tp = tcp_sk(stats->sk);
+	  u32 val = tp->rx_opt.rec_mss;*/
+
+ 	memcpy(buf, &val, 4);
 }
 
 /* Note: WinScaleSent and WinScaleRcvd are incorrectly
@@ -498,7 +499,7 @@ struct tcp_estats_var perf_var_array[] = {
 	ESTATSVARN(SndLimTimeTSODefer, COUNTER32, UNSIGNED32,
 		snd_lim_time[TCP_ESTATS_SNDLIM_TSODEFER], perf_table),
 	ESTATSVARN(SndLimTimePace, COUNTER32, UNSIGNED32,
-		snd_lim_time[TCP_ESTATS_SNDLIM_PACE], perf_table),
+		snd_lim_time[TCP_ESTATS_SNDLIM_PACE], perf_table)
 };
 
 struct tcp_estats_var path_var_array[] = {
@@ -527,7 +528,7 @@ struct tcp_estats_var path_var_array[] = {
 	READFUNC(RcvRTT, GAUGE32, UNSIGNED32),
 	ESTATSVAR(DupAcksOut, COUNTER32, UNSIGNED32, path_table),
 	ESTATSVAR(CERcvd, COUNTER32, UNSIGNED32, path_table),
-	ESTATSVAR(ECESent, COUNTER32, UNSIGNED32, path_table),
+	ESTATSVAR(ECESent, COUNTER32, UNSIGNED32, path_table)
 };
 
 struct tcp_estats_var stack_var_array[] = {
@@ -573,7 +574,7 @@ struct tcp_estats_var stack_var_array[] = {
 	READFUNC(CurReasmQueue, GAUGE32, UNSIGNED32),
 	ESTATSVAR(MaxReasmQueue, GAUGE32, UNSIGNED32, stack_table),
 	ESTATSVAR(EarlyRetrans, UNSIGNED32, UNSIGNED32, stack_table),
-	ESTATSVAR(EarlyRetransDelay, UNSIGNED32, UNSIGNED32, stack_table),
+	ESTATSVAR(EarlyRetransDelay, UNSIGNED32, UNSIGNED32, stack_table)
 };
 
 struct tcp_estats_var app_var_array[] = {
@@ -590,19 +591,19 @@ struct tcp_estats_var app_var_array[] = {
 	READFUNC(CurAppWQueue, GAUGE32, UNSIGNED32),
 	ESTATSVAR(MaxAppWQueue, GAUGE32, UNSIGNED32, app_table),
 	READFUNC(CurAppRQueue, GAUGE32, UNSIGNED32),
-	ESTATSVAR(MaxAppRQueue, GAUGE32, UNSIGNED32, app_table),
+	ESTATSVAR(MaxAppRQueue, GAUGE32, UNSIGNED32, app_table)
 };
 
 struct tcp_estats_var tune_var_array[] = {
 	RWFUNC(LimCwnd, GAUGE32, UNSIGNED32),
 	RWFUNC(LimRwin, GAUGE32, UNSIGNED32),
-	READFUNC(LimMSS, GAUGE32, UNSIGNED32),
+	READFUNC(LimMSS, GAUGE32, UNSIGNED32)
 };
 
 struct tcp_estats_var extras_var_array[] = {
   /*	ESTATSVAR(OtherReductionsCV, COUNTER32, UNSIGNED32, extras_table),*/
 	ESTATSVAR(OtherReductionsCM, COUNTER32, UNSIGNED32, extras_table),
-	READFUNC(Priority, UNSIGNED32, UNSIGNED32),
+	READFUNC(Priority, UNSIGNED32, UNSIGNED32)
 };
 
 struct tcp_estats_var *estats_var_array[] = {
