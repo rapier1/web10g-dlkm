@@ -192,11 +192,10 @@ static void read_MSSSent(void *buf, struct tcp_estats *stats,
 static void read_MSSRcvd(void *buf, struct tcp_estats *stats,
 			 struct tcp_estats_var *vp)
 {
-	u32 val = 1500;
-	/* why was this removed? */
-	/*struct tcp_sock *tp = tcp_sk(stats->sk);
-	  u32 val = tp->rx_opt.rec_mss;*/
-
+	/*u32 val = 1500;*/
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+	u32 val = tp->rx_opt.rec_mss;
+	
  	memcpy(buf, &val, 4);
 }
 
@@ -393,6 +392,78 @@ static void read_Priority(void *buf, struct tcp_estats *stats,
 	memcpy(buf, &stats->sk->sk_priority, sizeof(stats->sk->sk_priority));
 }
 
+static void read_HCThruOctetsAcked(void *buf, struct tcp_estats *stats,
+		       struct tcp_estats_var *vp)
+{
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+
+	u64 val = tp->bytes_acked;
+	memcpy(buf, &val, 8);
+}
+
+static void read_HCThruOctetsReceived(void *buf, struct tcp_estats *stats,
+		       struct tcp_estats_var *vp)
+{
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+
+	u64 val = tp->bytes_received;
+	memcpy(buf, &val, 8);
+}
+
+static void read_ThruOctetsAcked(void *buf, struct tcp_estats *stats,
+		       struct tcp_estats_var *vp)
+{
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+
+	u32 val = (u32)tp->bytes_acked;
+	memcpy(buf, &val, 4);
+}
+
+static void read_ThruOctetsReceived(void *buf, struct tcp_estats *stats,
+		       struct tcp_estats_var *vp)
+{
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+
+	u32 val = (u32)tp->bytes_received;
+	memcpy(buf, &val, 4);
+}
+
+static void read_SegsOut(void *buf, struct tcp_estats *stats,
+		       struct tcp_estats_var *vp)
+{
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+
+	u32 val = tp->segs_out;
+	memcpy(buf, &val, 4);
+}
+
+static void read_DataSegsOut(void *buf, struct tcp_estats *stats,
+		       struct tcp_estats_var *vp)
+{
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+
+	u32 val = tp->data_segs_out;
+	memcpy(buf, &val, 4);
+}
+
+static void read_SegsIn(void *buf, struct tcp_estats *stats,
+		       struct tcp_estats_var *vp)
+{
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+
+	u32 val = tp->segs_in;
+	memcpy(buf, &val, 4);
+}
+
+static void read_DataSegsIn(void *buf, struct tcp_estats *stats,
+		       struct tcp_estats_var *vp)
+{
+	struct tcp_sock *tp = tcp_sk(stats->sk);
+
+	u32 val = tp->data_segs_in;
+	memcpy(buf, &val, 4);
+}
+
 #define OFFSET_ST(field, table)	\
 	((unsigned long)(&(((struct tcp_estats_##table *)NULL)->field)))
 
@@ -446,15 +517,19 @@ int estats_max_index[MAX_TABLE] = { PERF_INDEX_MAX, PATH_INDEX_MAX,
 EXPORT_SYMBOL(estats_max_index);
 
 struct tcp_estats_var perf_var_array[] = {
-	ESTATSVAR(SegsOut, COUNTER32, UNSIGNED32, perf_table),
-	ESTATSVAR(DataSegsOut, COUNTER32, UNSIGNED32, perf_table),
+	/* ESTATSVAR(SegsOut, COUNTER32, UNSIGNED32, perf_table), */
+	/* ESTATSVAR(DataSegsOut, COUNTER32, UNSIGNED32, perf_table), */
+	READFUNC(SegsOut, COUNTER32, UNSIGNED32), 
+	READFUNC(DataSegsOut, COUNTER32, UNSIGNED32),
 	HCINF32(DataOctetsOut, COUNTER32, UNSIGNED32, perf_table),
 	ESTATSVARN(HCDataOctetsOut, COUNTER64, UNSIGNED64, DataOctetsOut,
 		   perf_table),
 	ESTATSVAR(SegsRetrans, COUNTER32, UNSIGNED32, perf_table),
 	ESTATSVAR(OctetsRetrans, COUNTER32, UNSIGNED32, perf_table),
-	ESTATSVAR(SegsIn, COUNTER32, UNSIGNED32, perf_table),
-	ESTATSVAR(DataSegsIn, COUNTER32, UNSIGNED32, perf_table),
+	/* ESTATSVAR(SegsIn, COUNTER32, UNSIGNED32, perf_table), */
+	/* ESTATSVAR(DataSegsIn, COUNTER32, UNSIGNED32, perf_table), */
+	READFUNC(SegsIn, COUNTER32, UNSIGNED32), 
+	READFUNC(DataSegsIn, COUNTER32, UNSIGNED32),
 	HCINF32(DataOctetsIn, COUNTER32, UNSIGNED32, perf_table),
 	ESTATSVARN(HCDataOctetsIn, COUNTER64, UNSIGNED64, DataOctetsIn,
 		   perf_table),
@@ -581,13 +656,17 @@ struct tcp_estats_var app_var_array[] = {
 	TPVAR32(SndUna, COUNTER32, UNSIGNED32, snd_una),
 	TPVAR32(SndNxt, UNSIGNED32, UNSIGNED32, snd_nxt),
 	ESTATSVAR(SndMax, COUNTER32, UNSIGNED32, app_table),
-	HCINF32(ThruOctetsAcked, COUNTER32, UNSIGNED32, app_table),
-	ESTATSVARN(HCThruOctetsAcked, COUNTER64, UNSIGNED64, ThruOctetsAcked,
-		   app_table),
+	/*HCINF32(ThruOctetsAcked, COUNTER32, UNSIGNED32, app_table),*/
+	READFUNC(ThruOctetsAcked, COUNTER32, UNSIGNED32),
+	READFUNC(HCThruOctetsAcked, COUNTER64, UNSIGNED64),
+	/*ESTATSVARN(HCThruOctetsAcked, COUNTER64, UNSIGNED64, ThruOctetsAcked,
+	  app_table),*/
 	TPVAR32(RcvNxt, COUNTER32, UNSIGNED32, rcv_nxt),
-	HCINF32(ThruOctetsReceived, COUNTER32, UNSIGNED32, app_table),
-	ESTATSVARN(HCThruOctetsReceived, COUNTER64, UNSIGNED64,
-		   ThruOctetsReceived, app_table),
+	/*HCINF32(ThruOctetsReceived, COUNTER32, UNSIGNED32, app_table),*/
+	READFUNC(ThruOctetsReceived, COUNTER32, UNSIGNED32),
+	READFUNC(HCThruOctetsReceived, COUNTER64, UNSIGNED64),
+	/*ESTATSVARN(HCThruOctetsReceived, COUNTER64, UNSIGNED64,
+	  ThruOctetsReceived, app_table),*/
 	READFUNC(CurAppWQueue, GAUGE32, UNSIGNED32),
 	ESTATSVAR(MaxAppWQueue, GAUGE32, UNSIGNED32, app_table),
 	READFUNC(CurAppRQueue, GAUGE32, UNSIGNED32),
