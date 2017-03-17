@@ -23,7 +23,7 @@ struct tcp_estats_connection_spec {
 };
 
 static struct genl_family genl_estats_family = {
-	.id     = GENL_ID_GENERATE,
+	/*.id     = GENL_ID_GENERATE,*/
 	.name   = "tcp_estats",
 	.hdrsize = 0,
 	.version = 1,
@@ -365,7 +365,7 @@ tcp_estats_put_conn_vals(struct sk_buff *msg, union estats_val *val,
                         switch (estats_var_array[tblnum][i].valtype) {
 
                         case TCP_ESTATS_VAL_UNSIGNED64:
-                                if (nla_put_u64(msg, i, val[k].u_64))
+                                if (nla_put_u64_64bit(msg, i, val[k].u_64, NLE_ATTR_PAD))
 					return -EMSGSIZE;
                                 break;
                         case TCP_ESTATS_VAL_UNSIGNED32:
@@ -1215,7 +1215,7 @@ genl_get_timestamp(struct sk_buff *skb, struct genl_info *info)
 #else
 	timestamp_token = (uint64_t)timestamp;
 #endif
-	if (nla_put_u64(msg, NLE_ATTR_TIMESTAMP, timestamp_token))
+	if (nla_put_u64_64bit(msg, NLE_ATTR_TIMESTAMP, timestamp_token, NLE_ATTR_PAD))
 		goto nla_put_failure;
 
 	genlmsg_end(msg, hdr);
