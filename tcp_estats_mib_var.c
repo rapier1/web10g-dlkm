@@ -630,7 +630,7 @@ struct tcp_estats_var stack_var_array[] = {
 	ESTATSVAR(SoftErrorReason, COUNTER32, SIGNED32, stack_table),
 	ESTATSVAR(SlowStart, COUNTER32, UNSIGNED32, stack_table),
 	ESTATSVAR(CongAvoid, COUNTER32, UNSIGNED32, stack_table),
-	ESTATSVAR(OtherReductions, COUNTER32, UNSIGNED32, stack_table),
+/*	ESTATSVAR(OtherReductions, COUNTER32, UNSIGNED32, stack_table),*/
 	ESTATSVAR(CongOverCount, COUNTER32, UNSIGNED32, stack_table),
 	ESTATSVAR(FastRetran, COUNTER32, UNSIGNED32, stack_table),
 	ESTATSVAR(SubsequentTimeouts, COUNTER32, UNSIGNED32, stack_table),
@@ -680,8 +680,8 @@ struct tcp_estats_var tune_var_array[] = {
 };
 
 struct tcp_estats_var extras_var_array[] = {
-  	/*ESTATSVAR(OtherReductionsCV, COUNTER32, UNSIGNED32, extras_table),*/
-	ESTATSVAR(OtherReductionsCM, COUNTER32, UNSIGNED32, extras_table),
+/*  	ESTATSVAR(OtherReductionsCV, COUNTER32, UNSIGNED32, extras_table),*/
+/*	ESTATSVAR(OtherReductionsCM, COUNTER32, UNSIGNED32, extras_table),*/
 	READFUNC(Priority, UNSIGNED32, UNSIGNED32)
 };
 
