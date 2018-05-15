@@ -225,11 +225,12 @@ static void read_WinScaleRcvd(void *buf, struct tcp_estats *stats,
 static void read_TimeStamps(void *buf, struct tcp_estats *stats,
 			    struct tcp_estats_var *vp)
 {
+	struct sock *sk = stats->sk;
 	struct tcp_sock *tp = tcp_sk(stats->sk);
 	s32 val = 1;
 
 	if (!tp->rx_opt.tstamp_ok) 
-		val = sysctl_tcp_timestamps ? 3 : 2; 
+	  val = sock_net(sk)->ipv4.sysctl_tcp_timestamps ? 3 : 2; 
 	memcpy(buf, &val, 4);
 }
 
@@ -249,11 +250,12 @@ static void read_ECN(void *buf, struct tcp_estats *stats,
 static void read_WillSendSACK(void *buf, struct tcp_estats *stats,
 			      struct tcp_estats_var *vp)
 {
+	struct sock *sk = stats->sk;
 	struct tcp_sock *tp = tcp_sk(stats->sk);
 	s32 val = 1;
 
 	if (!tp->rx_opt.sack_ok) 
-		val = sysctl_tcp_sack ? 3 : 2;
+	  val = sock_net(sk)->ipv4.sysctl_tcp_sack ? 3 : 2;
 	memcpy(buf, &val, 4);
 }
 
