@@ -104,7 +104,7 @@ tcp_estats_parse_cid(int *cid, const struct nlattr *nla) {
 	int ret = 0;
 	struct nlattr *tb[NEA_4TUPLE_MAX+1] = {};
 
-	ret = nla_parse_nested(tb, NEA_4TUPLE_MAX, nla, spec_policy);
+	ret = nla_parse_nested(tb, NEA_4TUPLE_MAX, nla, spec_policy, NULL);
 
 	if (ret < 0) {
 		pr_debug("Failed to parse nested 4tuple\n");
@@ -128,7 +128,7 @@ tcp_estats_parse_attr_mask(int if_mask[], uint64_t masks[],
 	struct nlattr *tb_mask[NEA_MASK_MAX+1] = {};
 
 	ret = nla_parse_nested(tb_mask, NEA_MASK_MAX,
-		nla, mask_policy);
+			       nla, mask_policy, NULL);
 
 	if (ret < 0) {
 		pr_debug("Failed to parse nested mask\n");
@@ -1124,7 +1124,7 @@ genl_write_var(struct sk_buff *skb, struct genl_info *info)
 		return -EINVAL;
 
         ret = nla_parse_nested(tb_tuple, NEA_4TUPLE_MAX,
-			       info->attrs[NLE_ATTR_4TUPLE], spec_policy);
+			       info->attrs[NLE_ATTR_4TUPLE], spec_policy, NULL);
 
 	if (ret < 0)
 		goto nla_parse_failure;
@@ -1141,7 +1141,7 @@ genl_write_var(struct sk_buff *skb, struct genl_info *info)
 		return -EINVAL;
 
         ret = nla_parse_nested(tb_write, NEA_WRITE_MAX,
-			       info->attrs[NLE_ATTR_WRITE], write_policy);
+			       info->attrs[NLE_ATTR_WRITE], write_policy, NULL);
 
 	if (ret < 0)
 		goto nla_parse_failure;

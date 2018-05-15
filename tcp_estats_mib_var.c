@@ -177,7 +177,7 @@ static void read_RcvRTT(void *buf, struct tcp_estats *stats,
 	struct tcp_sock *tp = tcp_sk(stats->sk);
 	/* WHY for the love of all that is holy, is rcv_rtt_est reported
          * in microsecs, whereas all other rtt measurements are in millisecs? */
-	u32 val = jiffies_to_usecs(tp->rcv_rtt_est.rtt)>>3;
+	u32 val = jiffies_to_usecs(tp->rcv_rtt_est.rtt_us)>>3;
 	memcpy(buf, &val, 4);
 }
 
