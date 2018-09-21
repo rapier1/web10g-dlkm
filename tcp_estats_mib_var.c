@@ -596,7 +596,8 @@ struct tcp_estats_var perf_var_array[] = {
 	ESTATSVARN(SndLimTimeTSODefer, COUNTER32, UNSIGNED32,
 		snd_lim_time[TCP_ESTATS_SNDLIM_TSODEFER], perf_table),
 	ESTATSVARN(SndLimTimePace, COUNTER32, UNSIGNED32,
-		snd_lim_time[TCP_ESTATS_SNDLIM_PACE], perf_table)
+		   snd_lim_time[TCP_ESTATS_SNDLIM_PACE], perf_table),
+	ESTATSVAR(LostRetransmitSegs, COUNTER32, UNSIGNED32, perf_table)
 };
 
 struct tcp_estats_var path_var_array[] = {
@@ -671,7 +672,8 @@ struct tcp_estats_var stack_var_array[] = {
 	READFUNC(CurReasmQueue, GAUGE32, UNSIGNED32),
 	ESTATSVAR(MaxReasmQueue, GAUGE32, UNSIGNED32, stack_table),
 	ESTATSVAR(EarlyRetrans, UNSIGNED32, UNSIGNED32, stack_table),
-	ESTATSVAR(EarlyRetransDelay, UNSIGNED32, UNSIGNED32, stack_table)
+	ESTATSVAR(EarlyRetransDelay, UNSIGNED32, UNSIGNED32, stack_table),
+	ESTATSVAR(RackTimeout, COUNTER32, UNSIGNED32, stack_table)
 };
 
 struct tcp_estats_var app_var_array[] = {
