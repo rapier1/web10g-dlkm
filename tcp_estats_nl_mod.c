@@ -206,7 +206,7 @@ tcp_estats_find_var_by_iname(struct tcp_estats_var **var, const char *name)
 }
 
 static int
-tcp_estats_read_conn_vals(union estats_val *val, struct timeval *read_time,
+tcp_estats_read_conn_vals(union estats_val *val, struct timespec64 *read_time,
 			  bool sys_admin, kgid_t current_gid, kuid_t current_uid,
 			  int if_mask[], uint64_t masks[],
 			  struct tcp_estats *stats) {
@@ -237,7 +237,7 @@ tcp_estats_read_conn_vals(union estats_val *val, struct timeval *read_time,
 		return -EACCES;
 	}
 
-	do_gettimeofday(read_time);
+	ktime_get_real_ts64(read_time);
 
         for (tblnum = 0; tblnum < MAX_TABLE; tblnum++) {
 		if (if_mask[tblnum]) {
@@ -278,7 +278,7 @@ tcp_estats_read_conn_vals(union estats_val *val, struct timeval *read_time,
     ]
 */
 static int
-tcp_estats_put_time(struct sk_buff *msg, struct timeval *read_time) {
+tcp_estats_put_time(struct sk_buff *msg, struct timespec64 *read_time) {
 	int ret = 0;
 	struct nlattr *nest = NULL;
 
@@ -291,7 +291,7 @@ tcp_estats_put_time(struct sk_buff *msg, struct timeval *read_time) {
 	if (ret<0)
 		return ret;
 	ret = nla_put_u32(msg, NEA_TIME_USEC,
-	       lower_32_bits(read_time->tv_usec));
+	       lower_32_bits(read_time->tv_nsec))/1000;
 	if (ret<0)
 		return ret;
 	nla_nest_end(msg, nest);
@@ -766,7 +766,7 @@ genl_read_all(struct sk_buff *skb, struct genl_info *info)
 	int numvars = TOTAL_NUM_VARS;
 	size_t valarray_size = numvars*sizeof(union estats_val);
 
-	struct timeval read_time;
+	struct timespec64 read_time;
 
 	bool sys_admin = capable(CAP_SYS_ADMIN);
 	/* ARGH!! this grabs a reference to current cred - must call put_cred */
@@ -970,7 +970,7 @@ genl_read_vars(struct sk_buff *skb, struct genl_info *info)
 	int numvars = TOTAL_NUM_VARS;
 	size_t valarray_size = numvars*sizeof(union estats_val);
 
-	struct timeval read_time;
+	struct timespec64 read_time;
 
 	/* could this be CAP_NET_ADMIN ? */
 	bool sys_admin = capable(CAP_SYS_ADMIN);
