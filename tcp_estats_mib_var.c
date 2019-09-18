@@ -100,7 +100,7 @@ static void read_StartTimeStamp(void *buf, struct tcp_estats *stats,
 				struct tcp_estats_var *vp)
 {
 	u64 msecs = (u64)stats->start_tv.tv_sec * 1000000; /* convert to msecs */
-	msecs = msecs + (u64)stats->start_tv.tv_usec;
+	msecs = msecs + (u64)stats->start_tv.tv_nsec/1000; /* convert nsec to msec */
 	memcpy(buf, &msecs, 8);
 }
 
@@ -310,13 +310,6 @@ static void read_CurTimeoutCount(void *buf, struct tcp_estats *stats,
 
 static inline u32 ofo_qlen(struct tcp_sock *tp)
 {
-        /* if (!skb_peek(&tp->out_of_order_queue)) */
-        /*      return 0; */
-        /* else */
-        /*      return TCP_SKB_CB(tp->out_of_order_queue.prev)->end_seq - */
-        /*          TCP_SKB_CB(tp->out_of_order_queue.next)->seq; */
-
-
         /* there was a change to the out_of_order_queue struct to
          * a red/black tree. The following may or may not work. The idea is to get
          * the first and last node and then subtract the sequence numbers to
@@ -539,8 +532,6 @@ int estats_max_index[MAX_TABLE] = { PERF_INDEX_MAX, PATH_INDEX_MAX,
 EXPORT_SYMBOL(estats_max_index);
 
 struct tcp_estats_var perf_var_array[] = {
-	/* ESTATSVAR(SegsOut, COUNTER32, UNSIGNED32, perf_table), */
-	/* ESTATSVAR(DataSegsOut, COUNTER32, UNSIGNED32, perf_table), */
 	READFUNC(SegsOut, COUNTER32, UNSIGNED32), 
 	READFUNC(DataSegsOut, COUNTER32, UNSIGNED32),
 	HCINF32(DataOctetsOut, COUNTER32, UNSIGNED32, perf_table),
@@ -548,8 +539,6 @@ struct tcp_estats_var perf_var_array[] = {
 		   perf_table),
 	ESTATSVAR(SegsRetrans, COUNTER32, UNSIGNED32, perf_table),
 	ESTATSVAR(OctetsRetrans, COUNTER32, UNSIGNED32, perf_table),
-	/* ESTATSVAR(SegsIn, COUNTER32, UNSIGNED32, perf_table), */
-	/* ESTATSVAR(DataSegsIn, COUNTER32, UNSIGNED32, perf_table), */
 	READFUNC(SegsIn, COUNTER32, UNSIGNED32), 
 	READFUNC(DataSegsIn, COUNTER32, UNSIGNED32),
 	HCINF32(DataOctetsIn, COUNTER32, UNSIGNED32, perf_table),
@@ -653,7 +642,6 @@ struct tcp_estats_var stack_var_array[] = {
 	ESTATSVAR(SoftErrorReason, COUNTER32, SIGNED32, stack_table),
 	ESTATSVAR(SlowStart, COUNTER32, UNSIGNED32, stack_table),
 	ESTATSVAR(CongAvoid, COUNTER32, UNSIGNED32, stack_table),
-/*	ESTATSVAR(OtherReductions, COUNTER32, UNSIGNED32, stack_table),*/
 	ESTATSVAR(CongOverCount, COUNTER32, UNSIGNED32, stack_table),
 	ESTATSVAR(FastRetran, COUNTER32, UNSIGNED32, stack_table),
 	ESTATSVAR(SubsequentTimeouts, COUNTER32, UNSIGNED32, stack_table),
@@ -667,8 +655,6 @@ struct tcp_estats_var stack_var_array[] = {
 	ESTATSVAR(MinMSS, GAUGE32, UNSIGNED32, stack_table),
 	ESTATSVAR(SndInitial, UNSIGNED32, UNSIGNED32, stack_table),
 	ESTATSVAR(RecInitial, UNSIGNED32, UNSIGNED32, stack_table),
-/*	ESTATSVAR(CurRetxQueue, GAUGE32, UNSIGNED32, stack_table),*/
-/*	ESTATSVAR(MaxRetxQueue, GAUGE32, UNSIGNED32, stack_table),*/
 	READFUNC(CurReasmQueue, GAUGE32, UNSIGNED32),
 	ESTATSVAR(MaxReasmQueue, GAUGE32, UNSIGNED32, stack_table),
 	ESTATSVAR(EarlyRetrans, UNSIGNED32, UNSIGNED32, stack_table),
@@ -680,17 +666,11 @@ struct tcp_estats_var app_var_array[] = {
 	TPVAR32(SndUna, COUNTER32, UNSIGNED32, snd_una),
 	TPVAR32(SndNxt, UNSIGNED32, UNSIGNED32, snd_nxt),
 	ESTATSVAR(SndMax, COUNTER32, UNSIGNED32, app_table),
-	/*HCINF32(ThruOctetsAcked, COUNTER32, UNSIGNED32, app_table),*/
 	READFUNC(ThruOctetsAcked, COUNTER32, UNSIGNED32),
 	READFUNC(HCThruOctetsAcked, COUNTER64, UNSIGNED64),
-	/*ESTATSVARN(HCThruOctetsAcked, COUNTER64, UNSIGNED64, ThruOctetsAcked,
-	  app_table),*/
 	TPVAR32(RcvNxt, COUNTER32, UNSIGNED32, rcv_nxt),
-	/*HCINF32(ThruOctetsReceived, COUNTER32, UNSIGNED32, app_table),*/
 	READFUNC(ThruOctetsReceived, COUNTER32, UNSIGNED32),
 	READFUNC(HCThruOctetsReceived, COUNTER64, UNSIGNED64),
-	/*ESTATSVARN(HCThruOctetsReceived, COUNTER64, UNSIGNED64,
-	  ThruOctetsReceived, app_table),*/
 	READFUNC(CurAppWQueue, GAUGE32, UNSIGNED32),
 	ESTATSVAR(MaxAppWQueue, GAUGE32, UNSIGNED32, app_table),
 	READFUNC(CurAppRQueue, GAUGE32, UNSIGNED32),
@@ -704,8 +684,6 @@ struct tcp_estats_var tune_var_array[] = {
 };
 
 struct tcp_estats_var extras_var_array[] = {
-/*  	ESTATSVAR(OtherReductionsCV, COUNTER32, UNSIGNED32, extras_table),*/
-/*	ESTATSVAR(OtherReductionsCM, COUNTER32, UNSIGNED32, extras_table),*/
 	READFUNC(Priority, UNSIGNED32, UNSIGNED32)
 };
 
