@@ -22,16 +22,55 @@ struct tcp_estats_connection_spec {
 	uint16_t local_port;
 };
 
-static struct genl_family genl_estats_family = {
-	.id     = GENL_ID_GENERATE,
-	.name   = "tcp_estats",
-	.hdrsize = 0,
-	.version = 1,
-	.maxattr = NLE_ATTR_MAX,
-};
+/* forward declarations for the static genl_estats_ops */
+static int genl_list_conns(struct sk_buff *, struct genl_info *);
+static int genl_get_mib(struct sk_buff *, struct genl_info *);
+static int genl_read_all(struct sk_buff *, struct genl_info *);
+static int genl_read_vars(struct sk_buff *, struct genl_info *);
+static int genl_write_var(struct sk_buff *, struct genl_info *);
+static int genl_get_timestamp(struct sk_buff *, struct genl_info *);
 
 static const struct genl_multicast_group genl_estats_mc[] = {
 	{ .name   = "tcp_estats_mc", },
+};
+
+static const struct genl_ops genl_estats_ops[] = {
+	{
+		.cmd  = TCPE_CMD_INIT,
+		.doit = genl_get_mib,
+	},
+        {
+                .cmd  = TCPE_CMD_LIST_CONNS,
+                .doit = genl_list_conns,
+        },
+        {
+                .cmd  = TCPE_CMD_READ_ALL,
+                .doit = genl_read_all,
+        },
+        {
+                .cmd  = TCPE_CMD_READ_VARS,
+                .doit = genl_read_vars,
+        },
+        {
+                .cmd  = TCPE_CMD_WRITE_VAR,
+                .doit = genl_write_var,
+        },
+        {
+                .cmd  = TCPE_CMD_TIMESTAMP,
+                .doit = genl_get_timestamp,
+        },
+};
+
+static struct genl_family genl_estats_family = {
+	.name   = "tcp_estats",
+	.hdrsize = 0,
+	.version = 1,
+	.module = THIS_MODULE,
+	.maxattr = NLE_ATTR_MAX,
+	.ops = genl_estats_ops,
+	.n_ops= ARRAY_SIZE(genl_estats_ops),
+	.mcgrps = genl_estats_mc,
+	.n_mcgrps = ARRAY_SIZE(genl_estats_mc),
 };
 
 static const struct nla_policy spec_policy[NEA_4TUPLE_MAX+1] = {
@@ -89,7 +128,7 @@ tcp_estats_parse_attr_mask(int if_mask[], uint64_t masks[],
 	struct nlattr *tb_mask[NEA_MASK_MAX+1] = {};
 
 	ret = nla_parse_nested(tb_mask, NEA_MASK_MAX,
-		nla, mask_policy);
+			       nla, mask_policy);
 
 	if (ret < 0) {
 		pr_debug("Failed to parse nested mask\n");
@@ -365,7 +404,7 @@ tcp_estats_put_conn_vals(struct sk_buff *msg, union estats_val *val,
                         switch (estats_var_array[tblnum][i].valtype) {
 
                         case TCP_ESTATS_VAL_UNSIGNED64:
-                                if (nla_put_u64(msg, i, val[k].u_64))
+                                if (nla_put_u64_64bit(msg, i, val[k].u_64, NLE_ATTR_PAD))
 					return -EMSGSIZE;
                                 break;
                         case TCP_ESTATS_VAL_UNSIGNED32:
@@ -706,7 +745,7 @@ genl_read_all(struct sk_buff *skb, struct genl_info *info)
 #ifdef CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME
 	ktime_t timestamp;
 #else
-	unsigned long timestamp;
+	unsigned long timestamp = 0;
 #endif
 	uint64_t timestamp_token = 0;
 	/* initial estimate of connection message size */
@@ -1215,7 +1254,7 @@ genl_get_timestamp(struct sk_buff *skb, struct genl_info *info)
 #else
 	timestamp_token = (uint64_t)timestamp;
 #endif
-	if (nla_put_u64(msg, NLE_ATTR_TIMESTAMP, timestamp_token))
+	if (nla_put_u64_64bit(msg, NLE_ATTR_TIMESTAMP, timestamp_token, NLE_ATTR_PAD))
 		goto nla_put_failure;
 
 	genlmsg_end(msg, hdr);
@@ -1235,40 +1274,12 @@ nla_put_failure:
 	return -ENOBUFS;
 }
 
-static const struct genl_ops genl_estats_ops[] = {
-	{
-		.cmd  = TCPE_CMD_INIT,
-		.doit = genl_get_mib,
-	},
-        {
-                .cmd  = TCPE_CMD_LIST_CONNS,
-                .doit = genl_list_conns,
-        },
-        {
-                .cmd  = TCPE_CMD_READ_ALL,
-                .doit = genl_read_all,
-        },
-        {
-                .cmd  = TCPE_CMD_READ_VARS,
-                .doit = genl_read_vars,
-        },
-        {
-                .cmd  = TCPE_CMD_WRITE_VAR,
-                .doit = genl_write_var,
-        },
-        {
-                .cmd  = TCPE_CMD_TIMESTAMP,
-                .doit = genl_get_timestamp,
-        },
-};
-
 static int __init tcp_estats_nl_init(void)
 {
 	int ret = -EINVAL;
 
-	ret = genl_register_family_with_ops_groups(&genl_estats_family,
-						genl_estats_ops, 
-						genl_estats_mc);
+	ret = genl_register_family(&genl_estats_family);
+
 	if (ret > 0) {
 		return ret;
 	}

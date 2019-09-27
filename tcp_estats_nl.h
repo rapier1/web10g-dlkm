@@ -44,6 +44,7 @@ enum nl_estats_attr {
 	NLE_ATTR_VAR,
 	NLE_ATTR_TIMESTAMP_DELTA, /* u32 timestamp delta - for timestamp cmd */
 	NLE_ATTR_TIMESTAMP, /* u64 timestamp, for filtering active conns. */
+        NLE_ATTR_PAD,
 	__NLE_ATTR_MAX
 };
 #define NLE_ATTR_MAX (__NLE_ATTR_MAX - 1)
