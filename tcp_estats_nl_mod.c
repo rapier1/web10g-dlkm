@@ -572,7 +572,7 @@ genl_list_conns(struct sk_buff *skb, struct genl_info *info)
 	/* variables for filtering inactive connections */
 	bool filter_new = false;
 #ifdef CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME
-	ktime_t timestamp = { .tv64 = 0 };
+	ktime_t timestamp = 0 ;
 #else
 	unsigned long timestamp = 0;
 #endif
@@ -606,7 +606,7 @@ genl_list_conns(struct sk_buff *skb, struct genl_info *info)
 		filter_new = true;
 		timestamp_token = nla_get_u64(info->attrs[NLE_ATTR_TIMESTAMP]);
 #ifdef CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME
-		timestamp.tv64 = (int64_t)timestamp_token;
+		timestamp = timestamp_token;
 #else
 		timestamp = (unsigned long)timestamp_token;
 #endif
@@ -656,7 +656,7 @@ genl_list_conns(struct sk_buff *skb, struct genl_info *info)
 			race condition... should be benign */
 		if (filter_new &&
 #ifdef CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME
-			(stats->current_ts.tv64 < timestamp.tv64)
+			(stats->current_ts < timestamp)
 #else
 			time_before(stats->current_ts, timestamp)
 #endif
@@ -743,7 +743,7 @@ genl_read_all(struct sk_buff *skb, struct genl_info *info)
 	/* variables for filtering inactive connections */
 	bool filter_new = false;
 #ifdef CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME
-	ktime_t timestamp;
+	ktime_t timestamp = 0;
 #else
 	unsigned long timestamp = 0;
 #endif
@@ -802,7 +802,7 @@ genl_read_all(struct sk_buff *skb, struct genl_info *info)
 		filter_new = true;
 		timestamp_token = nla_get_u64(info->attrs[NLE_ATTR_TIMESTAMP]);
 #ifdef CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME
-		timestamp.tv64 = (int64_t)timestamp_token;
+		timestamp = timestamp_token;
 #else
 		timestamp = (unsigned long)timestamp_token;
 #endif
@@ -852,7 +852,7 @@ genl_read_all(struct sk_buff *skb, struct genl_info *info)
 			race condition... should be benign */
 		if (filter_new &&
 #ifdef CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME
-			(stats->current_ts.tv64 < timestamp.tv64)
+			(stats->current_ts < timestamp)
 #else
 			time_before(stats->current_ts, timestamp)
 #endif
@@ -1250,7 +1250,7 @@ genl_get_timestamp(struct sk_buff *skb, struct genl_info *info)
 		goto nlmsg_failure;
 
 #ifdef CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME
-	timestamp_token = (uint64_t)(timestamp.tv64);
+	timestamp_token = (uint64_t)timestamp;
 #else
 	timestamp_token = (uint64_t)timestamp;
 #endif
